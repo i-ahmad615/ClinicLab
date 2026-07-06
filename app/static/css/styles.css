@@ -1,0 +1,79 @@
+:root {
+    --sidebar-width: 240px;
+    --brand-color: #0b6fa4;
+    --soft-bg: #f5f7fa;
+}
+
+body {
+    background: var(--soft-bg);
+}
+
+.sidebar {
+    width: var(--sidebar-width);
+    min-height: 100vh;
+    background: #ffffff;
+    border-right: 1px solid #e5e5e5;
+}
+
+.sidebar .nav-link {
+    color: #1f2a37;
+    font-weight: 500;
+}
+
+.sidebar .nav-link.active {
+    background: rgba(11, 111, 164, 0.12);
+    color: var(--brand-color);
+    border-radius: 6px;
+}
+
+.content {
+    min-height: 100vh;
+}
+
+.card-metric {
+    border: none;
+    box-shadow: 0 4px 12px rgba(18, 38, 63, 0.08);
+}
+
+.btn-primary {
+    background: var(--brand-color);
+    border-color: var(--brand-color);
+}
+
+.table thead th {
+    background: #f0f4f8;
+}
+
+.form-label {
+    font-weight: 600;
+}
+
+.print-area {
+    max-width: 320px;
+}
+
+@media print {
+    body {
+        background: #ffffff;
+    }
+
+    .sidebar,
+    .navbar,
+    .btn,
+    .alert,
+    .offcanvas,
+    .d-print-none {
+        display: none !important;
+    }
+
+    .content,
+    .container-fluid {
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    .print-area {
+        max-width: 100%;
+        margin: 0 auto;
+    }
+}

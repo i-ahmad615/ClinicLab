@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Dashboard</h2>
+    <div class="d-flex gap-2">
+        <a class="btn btn-primary" href="{{ url_for('patients.create_patient') }}">Register Patient</a>
+        <a class="btn btn-outline-primary" href="{{ url_for('visits.create_visit') }}">Create Visit</a>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4 col-lg-3">
+        <div class="card card-metric p-3">
+            <h6 class="text-muted">Today's Patients</h6>
+            <h3>{{ todays_patients }}</h3>
+        </div>
+    </div>
+    <div class="col-md-4 col-lg-3">
+        <div class="card card-metric p-3">
+            <h6 class="text-muted">Today's Visits</h6>
+            <h3>{{ todays_visits }}</h3>
+        </div>
+    </div>
+    <div class="col-md-4 col-lg-3">
+        <div class="card card-metric p-3">
+            <h6 class="text-muted">Registered Patients</h6>
+            <h3>{{ total_patients }}</h3>
+        </div>
+    </div>
+    <div class="col-md-4 col-lg-3">
+        <div class="card card-metric p-3">
+            <h6 class="text-muted">Doctors</h6>
+            <h3>{{ total_doctors }}</h3>
+        </div>
+    </div>
+    <div class="col-md-4 col-lg-3">
+        <div class="card card-metric p-3">
+            <h6 class="text-muted">Pending Reports</h6>
+            <h3>0</h3>
+        </div>
+    </div>
+    <div class="col-md-4 col-lg-3">
+        <div class="card card-metric p-3">
+            <h6 class="text-muted">Revenue</h6>
+            <h3>0</h3>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-6">
+        <div class="card p-3">
+            <h5 class="mb-3">Recent Patients</h5>
+            <div class="table-responsive">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Patient ID</th>
+                            <th>Name</th>
+                            <th>Phone</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for patient in recent_patients %}
+                        <tr>
+                            <td>{{ patient.patient_id }}</td>
+                            <td>{{ patient.full_name }}</td>
+                            <td>{{ patient.phone }}</td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="3" class="text-muted">No patients yet.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card p-3">
+            <h5 class="mb-3">Today's Visits</h5>
+            <div class="table-responsive">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Patient</th>
+                            <th>Doctor</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for visit in todays_visits_list %}
+                        <tr>
+                            <td>{{ visit.patient.full_name }}</td>
+                            <td>{{ visit.doctor.name }}</td>
+                            <td>{{ visit.status }}</td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="3" class="text-muted">No visits today.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

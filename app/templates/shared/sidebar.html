@@ -1,0 +1,33 @@
+<div class="mb-4">
+    <h4 class="text-primary">ClinicLab</h4>
+    <small class="text-muted">Laboratory & Clinic</small>
+</div>
+
+<ul class="nav nav-pills flex-column gap-1">
+    <li class="nav-item">
+        {% if current_user.role and current_user.role.name == 'Doctor' %}
+        <a class="nav-link {% if request.endpoint in ['visits.doctor_dashboard'] %}active{% endif %}" href="{{ url_for('visits.doctor_dashboard') }}">Dashboard</a>
+        {% else %}
+        <a class="nav-link {% if request.endpoint in ['dashboard.index'] %}active{% endif %}" href="{{ url_for('dashboard.index') }}">Dashboard</a>
+        {% endif %}
+    </li>
+    {% if not current_user.role or current_user.role.name != 'Doctor' %}
+    <li class="nav-item">
+        <a class="nav-link {% if request.endpoint in ['patients.list_patients', 'patients.create_patient', 'patients.patient_detail', 'patients.edit_patient'] %}active{% endif %}" href="{{ url_for('patients.list_patients') }}">Patients</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {% if request.endpoint in ['visits.list_visits', 'visits.create_visit'] %}active{% endif %}" href="{{ url_for('visits.list_visits') }}">Visits</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {% if request.endpoint in ['doctors.list_doctors', 'doctors.create_doctor', 'doctors.edit_doctor'] %}active{% endif %}" href="{{ url_for('doctors.list_doctors') }}">Doctors</a>
+    </li>
+    {% endif %}
+    {% if current_user.role and current_user.role.name == 'Doctor' %}
+    <li class="nav-item">
+        <a class="nav-link {% if request.endpoint in ['visits.doctor_queue'] %}active{% endif %}" href="{{ url_for('visits.doctor_queue') }}">Doctor Queue</a>
+    </li>
+    {% endif %}
+    <li class="nav-item mt-3">
+        <a class="nav-link text-danger" href="{{ url_for('auth.logout') }}">Logout</a>
+    </li>
+</ul>

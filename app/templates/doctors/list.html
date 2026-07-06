@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Doctors</h2>
+    <a class="btn btn-primary" href="{{ url_for('doctors.create_doctor') }}">New Doctor</a>
+</div>
+
+<div class="card p-3">
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>PMC</th>
+                    <th>Specialization</th>
+                    <th>Status</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for doctor in doctors %}
+                <tr>
+                    <td>{{ doctor.name }}</td>
+                    <td>{{ doctor.pmc_number or 'N/A' }}</td>
+                    <td>{{ doctor.specialization or 'N/A' }}</td>
+                    <td>{{ doctor.status }}</td>
+                    <td class="text-end">
+                        <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('doctors.edit_doctor', doctor_id=doctor.id) }}">Edit</a>
+                        <form method="post" action="{{ url_for('doctors.deactivate_doctor', doctor_id=doctor.id) }}" class="d-inline">
+                            <button class="btn btn-sm btn-outline-danger" data-confirm="Deactivate this doctor?" type="submit">Deactivate</button>
+                        </form>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" class="text-muted">No doctors found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

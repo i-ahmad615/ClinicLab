@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>New Visit</h2>
+    <a class="btn btn-outline-secondary" href="{{ url_for('visits.list_visits') }}">Back</a>
+</div>
+
+<div class="card p-3">
+    <form method="post">
+        <div class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label">Visit Number</label>
+                <input type="text" class="form-control" value="{{ visit_number }}" readonly>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Visit Date</label>
+                <input type="text" class="form-control" value="{{ visit_date }}" readonly>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Visit Time</label>
+                <input type="text" class="form-control" value="{{ visit_time }}" readonly>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Patient *</label>
+                <select class="form-select" name="patient_id" required>
+                    <option value="">Select</option>
+                    {% for patient in patients %}
+                    <option value="{{ patient.id }}" {% if selected_patient_id and selected_patient_id|int == patient.id %}selected{% endif %}>{{ patient.patient_id }} - {{ patient.full_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Doctor *</label>
+                <select class="form-select" name="doctor_id" required>
+                    <option value="">Select</option>
+                    {% for doctor in doctors %}
+                    <option value="{{ doctor.id }}">{{ doctor.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Department</label>
+                <input type="text" name="department" class="form-control">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Reason of Visit *</label>
+                <input type="text" name="reason" class="form-control" required>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Follow Up Date</label>
+                <input type="date" name="follow_up_date" class="form-control">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Visit Status</label>
+                <select class="form-select" name="status">
+                    {% for option in ['Waiting', 'In Consultation', 'Completed', 'Cancelled'] %}
+                    <option value="{{ option }}">{{ option }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="mt-4 d-flex gap-2">
+            <button class="btn btn-primary" type="submit">Save</button>
+            <a class="btn btn-outline-secondary" href="{{ url_for('visits.list_visits') }}">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

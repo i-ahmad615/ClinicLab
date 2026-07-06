@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>{% if doctor %}Edit Doctor{% else %}New Doctor{% endif %}</h2>
+    <a class="btn btn-outline-secondary" href="{{ url_for('doctors.list_doctors') }}">Back</a>
+</div>
+
+<div class="card p-3">
+    <form method="post">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Doctor Name *</label>
+                <input type="text" name="name" class="form-control" value="{{ doctor.name if doctor else '' }}" required>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">PMC Number</label>
+                <input type="text" name="pmc_number" class="form-control" value="{{ doctor.pmc_number if doctor else '' }}">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Specialization</label>
+                <input type="text" name="specialization" class="form-control" value="{{ doctor.specialization if doctor else '' }}">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Phone</label>
+                <input type="text" name="phone" class="form-control" value="{{ doctor.phone if doctor else '' }}">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Status</label>
+                <select class="form-select" name="status">
+                    {% for option in ['Active', 'Inactive'] %}
+                    <option value="{{ option }}" {% if doctor and doctor.status == option %}selected{% endif %}>{{ option }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Username *</label>
+                <input type="text" name="username" class="form-control" value="{{ linked_user.username if linked_user else '' }}" {% if not doctor %}required{% endif %}>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Password {% if not doctor %}*{% endif %}</label>
+                <input type="password" name="password" class="form-control" {% if not doctor %}required{% endif %}>
+                {% if doctor %}
+                <div class="form-text">Leave blank to keep the current password.</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="mt-4 d-flex gap-2">
+            <button class="btn btn-primary" type="submit">Save</button>
+            <a class="btn btn-outline-secondary" href="{{ url_for('doctors.list_doctors') }}">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

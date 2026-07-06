@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Doctor Dashboard</h2>
+    <a class="btn btn-outline-primary" href="{{ url_for('visits.doctor_queue') }}">Open Queue</a>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4 col-lg-3">
+        <div class="card card-metric p-3">
+            <h6 class="text-muted">Waiting Patients</h6>
+            <h3>{{ waiting_count }}</h3>
+        </div>
+    </div>
+    <div class="col-md-4 col-lg-3">
+        <div class="card card-metric p-3">
+            <h6 class="text-muted">Completed Today</h6>
+            <h3>{{ completed_today }}</h3>
+        </div>
+    </div>
+    <div class="col-md-4 col-lg-3">
+        <div class="card card-metric p-3">
+            <h6 class="text-muted">Patients Seen</h6>
+            <h3>{{ patients_seen }}</h3>
+        </div>
+    </div>
+</div>
+
+<div class="card p-3">
+    <h5 class="mb-3">Today's Queue</h5>
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th>Token</th>
+                    <th>Patient</th>
+                    <th>Time</th>
+                    <th>Status</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for visit in queue %}
+                <tr>
+                    <td>{{ visit.token_display }}</td>
+                    <td>{{ visit.patient.full_name }}</td>
+                    <td>{{ visit.visit_date.strftime('%H:%M') }}</td>
+                    <td>{{ visit.status }}</td>
+                    <td class="text-end">
+                        <a class="btn btn-sm btn-outline-primary" href="{{ url_for('visits.consult_visit', visit_id=visit.id) }}">Open Patient</a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" class="text-muted">No visits today.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

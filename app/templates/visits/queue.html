@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Doctor Queue</h2>
+</div>
+
+<div class="card p-3">
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th>Token</th>
+                    <th>Patient Name</th>
+                    <th>Patient ID</th>
+                    <th>Visit Time</th>
+                    <th>Status</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for visit in queue %}
+                <tr>
+                    <td>{{ visit.token_display }}</td>
+                    <td>{{ visit.patient.full_name }}</td>
+                    <td>{{ visit.patient.patient_id }}</td>
+                    <td>{{ visit.visit_date.strftime('%H:%M') }}</td>
+                    <td>{{ visit.status }}</td>
+                    <td class="text-end">
+                        <a class="btn btn-sm btn-outline-primary" href="{{ url_for('visits.consult_visit', visit_id=visit.id) }}">Open Patient</a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" class="text-muted">No visits in queue.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
