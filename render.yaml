@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: cliniclab
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    disk:
+      name: cliniclab-disk
+      mountPath: /app/instance
+      sizeGB: 1

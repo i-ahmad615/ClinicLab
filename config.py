@@ -10,3 +10,4 @@ class Config:
         "sqlite:///" + os.path.join(BASE_DIR, "instance", "clinic.db"),
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    DEBUG = False
