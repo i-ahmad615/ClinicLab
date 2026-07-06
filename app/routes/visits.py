@@ -30,6 +30,13 @@ def create_visit():
     now = datetime.now()
     visit_number = generate_visit_number()
 
+    if not doctors:
+        doctors = Doctor.query.order_by(Doctor.name.asc()).all()
+        if not doctors:
+            flash("No doctors found. Please add a doctor first.", "warning")
+        else:
+            flash("No active doctors found. Showing all doctors.", "warning")
+
     if request.method == "POST":
         form = request.form
         patient_id = form.get("patient_id")

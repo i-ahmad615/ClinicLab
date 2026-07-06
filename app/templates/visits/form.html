@@ -23,7 +23,8 @@
             </div>
             <div class="col-md-6">
                 <label class="form-label">Patient *</label>
-                <select class="form-select" name="patient_id" required>
+                <input type="text" id="patientSearch" class="form-control mb-2" placeholder="Search patient by ID, name, or phone">
+                <select class="form-select" name="patient_id" id="patientSelect" required>
                     <option value="">Select</option>
                     {% for patient in patients %}
                     <option value="{{ patient.id }}" {% if selected_patient_id and selected_patient_id|int == patient.id %}selected{% endif %}>{{ patient.patient_id }} - {{ patient.full_name }}</option>
@@ -35,7 +36,7 @@
                 <select class="form-select" name="doctor_id" required>
                     <option value="">Select</option>
                     {% for doctor in doctors %}
-                    <option value="{{ doctor.id }}">{{ doctor.name }}</option>
+                    <option value="{{ doctor.id }}">{{ doctor.name }}{% if doctor.status and doctor.status != 'Active' %} ({{ doctor.status }}){% endif %}</option>
                     {% endfor %}
                 </select>
             </div>

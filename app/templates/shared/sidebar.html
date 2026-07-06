@@ -18,9 +18,11 @@
     <li class="nav-item">
         <a class="nav-link {% if request.endpoint in ['visits.list_visits', 'visits.create_visit'] %}active{% endif %}" href="{{ url_for('visits.list_visits') }}">Visits</a>
     </li>
+    {% if current_user.role and current_user.role.name == 'Administrator' %}
     <li class="nav-item">
         <a class="nav-link {% if request.endpoint in ['doctors.list_doctors', 'doctors.create_doctor', 'doctors.edit_doctor'] %}active{% endif %}" href="{{ url_for('doctors.list_doctors') }}">Doctors</a>
     </li>
+    {% endif %}
     {% endif %}
     {% if current_user.role and current_user.role.name == 'Doctor' %}
     <li class="nav-item">

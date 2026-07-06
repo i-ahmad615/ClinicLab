@@ -26,4 +26,21 @@ document.addEventListener("DOMContentLoaded", () => {
             ageInput.value = age;
         });
     }
+
+    const patientSearch = document.querySelector("#patientSearch");
+    const patientSelect = document.querySelector("#patientSelect");
+    if (patientSearch && patientSelect) {
+        patientSearch.addEventListener("input", () => {
+            const query = patientSearch.value.toLowerCase();
+            const options = Array.from(patientSelect.options);
+            options.forEach((option) => {
+                if (!option.value) {
+                    option.hidden = false;
+                    return;
+                }
+                const text = option.text.toLowerCase();
+                option.hidden = query && !text.includes(query);
+            });
+        });
+    }
 });
