@@ -8,25 +8,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    const dobInput = document.querySelector("#dob");
-    const ageInput = document.querySelector("#age");
-    if (dobInput && ageInput) {
-        dobInput.addEventListener("change", () => {
-            const dob = new Date(dobInput.value);
-            if (Number.isNaN(dob.getTime())) {
-                ageInput.value = "";
-                return;
-            }
-            const today = new Date();
-            let age = today.getFullYear() - dob.getFullYear();
-            const monthDiff = today.getMonth() - dob.getMonth();
-            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
-                age -= 1;
-            }
-            ageInput.value = age;
-        });
-    }
-
     const patientSearch = document.querySelector("#patientSearch");
     const patientSelect = document.querySelector("#patientSelect");
     if (patientSearch && patientSelect) {
@@ -42,5 +23,22 @@ document.addEventListener("DOMContentLoaded", () => {
                 option.hidden = query && !text.includes(query);
             });
         });
+    }
+
+    const reasonChoice = document.querySelector("#reasonChoice");
+    const reasonOther = document.querySelector("#reasonOther");
+    if (reasonChoice && reasonOther) {
+        const toggleReason = () => {
+            if (reasonChoice.value === "Other") {
+                reasonOther.classList.remove("d-none");
+                reasonOther.required = true;
+            } else {
+                reasonOther.classList.add("d-none");
+                reasonOther.required = false;
+                reasonOther.value = "";
+            }
+        };
+        reasonChoice.addEventListener("change", toggleReason);
+        toggleReason();
     }
 });

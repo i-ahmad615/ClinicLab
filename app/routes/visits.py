@@ -41,7 +41,9 @@ def create_visit():
         form = request.form
         patient_id = form.get("patient_id")
         doctor_id = form.get("doctor_id")
-        reason = form.get("reason", "").strip()
+        reason_choice = form.get("reason_choice", "").strip()
+        reason_other = form.get("reason_other", "").strip()
+        reason = reason_choice if reason_choice != "Other" else reason_other
         today = date.today()
 
         if not patient_id or not doctor_id or not reason:

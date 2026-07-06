@@ -15,11 +15,11 @@
             </div>
             <div class="col-md-4">
                 <label class="form-label">Visit Date</label>
-                <input type="text" class="form-control" value="{{ visit_date }}" readonly>
+                <input type="date" name="visit_date" class="form-control" value="{{ visit_date }}">
             </div>
             <div class="col-md-4">
                 <label class="form-label">Visit Time</label>
-                <input type="text" class="form-control" value="{{ visit_time }}" readonly>
+                <input type="time" name="visit_time" class="form-control" value="{{ visit_time }}">
             </div>
             <div class="col-md-6">
                 <label class="form-label">Patient *</label>
@@ -46,7 +46,13 @@
             </div>
             <div class="col-md-6">
                 <label class="form-label">Reason of Visit *</label>
-                <input type="text" name="reason" class="form-control" required>
+                <select class="form-select" name="reason_choice" id="reasonChoice" required>
+                    <option value="">Select</option>
+                    {% for option in ['Fever', 'Loose motion', 'Vomiting', 'Diarria', 'Pneumonia', 'Dehydration', 'Other'] %}
+                    <option value="{{ option }}">{{ option }}</option>
+                    {% endfor %}
+                </select>
+                <input type="text" name="reason_other" id="reasonOther" class="form-control mt-2 d-none" placeholder="Please specify">
             </div>
             <div class="col-md-4">
                 <label class="form-label">Follow Up Date</label>

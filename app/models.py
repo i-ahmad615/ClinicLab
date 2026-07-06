@@ -75,7 +75,7 @@ class Patient(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     patient_id = db.Column(db.String(20), unique=True, nullable=False)
-    cnic = db.Column(db.String(20), unique=True, nullable=False)
+    cnic = db.Column(db.String(20), unique=True, nullable=True)
     first_name = db.Column(db.String(120), nullable=False)
     last_name = db.Column(db.String(120))
     gender = db.Column(db.String(20), nullable=False)

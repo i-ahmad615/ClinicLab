@@ -9,11 +9,9 @@ from app.utils.decorators import role_required
 from app.utils.helpers import (
     CNIC_PATTERN,
     PHONE_PATTERN,
-    calculate_age,
     generate_patient_id,
     normalize_cnic,
     normalize_phone,
-    parse_date,
 )
 
 
@@ -58,7 +56,7 @@ def create_patient():
         cnic_raw = form.get("cnic", "").strip()
         phone_raw = form.get("phone", "").strip()
 
-        if not CNIC_PATTERN.match(cnic_raw):
+        if cnic_raw and not CNIC_PATTERN.match(cnic_raw):
             flash("Invalid CNIC format. Use 13 digits or 5-7-1 format.", "warning")
             return render_template(
                 "patients/form.html",
@@ -74,10 +72,10 @@ def create_patient():
                 patient_id=generate_patient_id(),
             )
 
-        normalized_cnic = normalize_cnic(cnic_raw)
+        normalized_cnic = normalize_cnic(cnic_raw) if cnic_raw else None
         normalized_phone = normalize_phone(phone_raw)
 
-        if Patient.query.filter_by(cnic=normalized_cnic).first():
+        if normalized_cnic and Patient.query.filter_by(cnic=normalized_cnic).first():
             flash("CNIC already exists.", "danger")
             return render_template(
                 "patients/form.html",
@@ -91,7 +89,6 @@ def create_patient():
             first_name=form.get("first_name", "").strip(),
             last_name=form.get("last_name", "").strip(),
             gender=form.get("gender", "").strip(),
-            dob=parse_date(form.get("dob")),
             age=int(form.get("age")) if form.get("age") else None,
             phone=normalized_phone,
             emergency_contact=normalize_phone(form.get("emergency_contact")),
@@ -106,9 +103,6 @@ def create_patient():
             created_by=current_user.username,
             created_at=datetime.utcnow(),
         )
-
-        if patient.dob:
-            patient.age = calculate_age(patient.dob)
 
         if not patient.first_name or not patient.gender or not patient.phone:
             flash("Please fill in all required fields.", "warning")
@@ -162,7 +156,7 @@ def edit_patient(patient_id):
         cnic_raw = form.get("cnic", "").strip()
         phone_raw = form.get("phone", "").strip()
 
-        if not CNIC_PATTERN.match(cnic_raw):
+        if cnic_raw and not CNIC_PATTERN.match(cnic_raw):
             flash("Invalid CNIC format.", "warning")
             return render_template("patients/form.html", patient=patient, patient_id=patient.patient_id)
 
@@ -170,10 +164,12 @@ def edit_patient(patient_id):
             flash("Invalid phone number format.", "warning")
             return render_template("patients/form.html", patient=patient, patient_id=patient.patient_id)
 
-        normalized_cnic = normalize_cnic(cnic_raw)
+        normalized_cnic = normalize_cnic(cnic_raw) if cnic_raw else None
         normalized_phone = normalize_phone(phone_raw)
 
-        existing_cnic = Patient.query.filter_by(cnic=normalized_cnic).first()
+        existing_cnic = None
+        if normalized_cnic:
+            existing_cnic = Patient.query.filter_by(cnic=normalized_cnic).first()
         if existing_cnic and existing_cnic.id != patient.id:
             flash("CNIC already exists.", "danger")
             return render_template("patients/form.html", patient=patient, patient_id=patient.patient_id)
@@ -182,7 +178,6 @@ def edit_patient(patient_id):
         patient.first_name = form.get("first_name", "").strip()
         patient.last_name = form.get("last_name", "").strip()
         patient.gender = form.get("gender", "").strip()
-        patient.dob = parse_date(form.get("dob"))
         patient.age = int(form.get("age")) if form.get("age") else None
         patient.phone = normalized_phone
         patient.emergency_contact = normalize_phone(form.get("emergency_contact"))
@@ -195,9 +190,6 @@ def edit_patient(patient_id):
         patient.known_diseases = form.get("known_diseases")
         patient.remarks = form.get("remarks")
         patient.updated_at = datetime.utcnow()
-
-        if patient.dob:
-            patient.age = calculate_age(patient.dob)
 
         if not patient.first_name or not patient.gender or not patient.phone:
             flash("Please fill in all required fields.", "warning")
