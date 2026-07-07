@@ -27,8 +27,12 @@
                     <td>{{ doctor.status }}</td>
                     <td class="text-end">
                         <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('doctors.edit_doctor', doctor_id=doctor.id) }}">Edit</a>
-                        <form method="post" action="{{ url_for('doctors.deactivate_doctor', doctor_id=doctor.id) }}" class="d-inline">
-                            <button class="btn btn-sm btn-outline-danger" data-confirm="Deactivate this doctor?" type="submit">Deactivate</button>
+                        <form method="post" action="{{ url_for('doctors.toggle_doctor_status', doctor_id=doctor.id) }}" class="d-inline">
+                            {% if doctor.status == 'Active' %}
+                            <button class="btn btn-sm btn-outline-warning" data-confirm="Deactivate this doctor?" type="submit">Deactivate</button>
+                            {% else %}
+                            <button class="btn btn-sm btn-outline-success" data-confirm="Activate this doctor?" type="submit">Activate</button>
+                            {% endif %}
                         </form>
                     </td>
                 </tr>

@@ -205,10 +205,25 @@ def edit_patient(patient_id):
 @patients_bp.route("/<int:patient_id>/deactivate", methods=["POST"])
 @login_required
 @role_required(["Administrator", "Receptionist"])
-def deactivate_patient(patient_id):
+def toggle_patient_status(patient_id):
     patient = Patient.query.get_or_404(patient_id)
-    patient.active = False
+    patient.active = not patient.active
     patient.updated_at = datetime.utcnow()
     db.session.commit()
-    flash("Patient deactivated successfully.", "success")
+    flash(
+        "Patient activated successfully." if patient.active else "Patient deactivated successfully.",
+        "success",
+    )
+    return redirect(url_for("patients.list_patients"))
+
+
+@patients_bp.route("/<int:patient_id>/delete", methods=["POST"])
+@login_required
+@role_required(["Administrator", "Receptionist"])
+def delete_patient(patient_id):
+    patient = Patient.query.get_or_404(patient_id)
+    Visit.query.filter_by(patient_id=patient.id).delete()
+    db.session.delete(patient)
+    db.session.commit()
+    flash("Patient record deleted successfully.", "success")
     return redirect(url_for("patients.list_patients"))

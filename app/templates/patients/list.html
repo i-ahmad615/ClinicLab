@@ -43,8 +43,15 @@
                     <td class="text-end">
                         <a class="btn btn-sm btn-outline-primary" href="{{ url_for('patients.patient_detail', patient_id=patient.id) }}">View</a>
                         <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('patients.edit_patient', patient_id=patient.id) }}">Edit</a>
-                        <form method="post" action="{{ url_for('patients.deactivate_patient', patient_id=patient.id) }}" class="d-inline">
-                            <button class="btn btn-sm btn-outline-danger" data-confirm="Deactivate this patient?" type="submit">Deactivate</button>
+                        <form method="post" action="{{ url_for('patients.toggle_patient_status', patient_id=patient.id) }}" class="d-inline">
+                            {% if patient.active %}
+                            <button class="btn btn-sm btn-outline-warning" data-confirm="Deactivate this patient?" type="submit">Deactivate</button>
+                            {% else %}
+                            <button class="btn btn-sm btn-outline-success" data-confirm="Activate this patient?" type="submit">Activate</button>
+                            {% endif %}
+                        </form>
+                        <form method="post" action="{{ url_for('patients.delete_patient', patient_id=patient.id) }}" class="d-inline">
+                            <button class="btn btn-sm btn-outline-danger" data-confirm="Delete this patient and all visit records?" type="submit">Delete</button>
                         </form>
                     </td>
                 </tr>

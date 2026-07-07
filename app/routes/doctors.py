@@ -145,10 +145,18 @@ def edit_doctor(doctor_id):
 @doctors_bp.route("/<int:doctor_id>/deactivate", methods=["POST"])
 @login_required
 @role_required(["Administrator"])
-def deactivate_doctor(doctor_id):
+def toggle_doctor_status(doctor_id):
     doctor = Doctor.query.get_or_404(doctor_id)
-    doctor.status = "Inactive"
+    doctor.status = "Active" if doctor.status != "Active" else "Inactive"
     doctor.updated_at = datetime.utcnow()
+
+    linked_user = User.query.filter_by(doctor_id=doctor.id).first()
+    if linked_user:
+        linked_user.active = doctor.status == "Active"
+
     db.session.commit()
-    flash("Doctor deactivated successfully.", "success")
+    flash(
+        "Doctor activated successfully." if doctor.status == "Active" else "Doctor deactivated successfully.",
+        "success",
+    )
     return redirect(url_for("doctors.list_doctors"))
