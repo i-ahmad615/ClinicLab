@@ -1,4 +1,5 @@
 from datetime import datetime
+import sqlite3
 
 from flask_login import LoginManager, UserMixin
 from flask_sqlalchemy import SQLAlchemy
@@ -14,6 +15,9 @@ login_manager.login_message_category = "warning"
 
 @event.listens_for(Engine, "connect")
 def set_sqlite_pragma(dbapi_connection, _):
+    if not isinstance(dbapi_connection, sqlite3.Connection):
+        return
+
     cursor = dbapi_connection.cursor()
     cursor.execute("PRAGMA foreign_keys=ON")
     cursor.close()
