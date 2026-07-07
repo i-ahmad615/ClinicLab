@@ -126,3 +126,45 @@ def receptionist_credentials():
         "admin/receptionist_credentials.html",
         receptionist_user=receptionist_user,
     )
+
+
+@dashboard_bp.route("/admin/account", methods=["GET", "POST"])
+@login_required
+@role_required(["Administrator"])
+def admin_account_credentials():
+    if request.method == "POST":
+        username = request.form.get("username", "").strip()
+        current_password = request.form.get("current_password", "")
+        new_password = request.form.get("new_password", "")
+        confirm_password = request.form.get("confirm_password", "")
+
+        if not username or not current_password:
+            flash("Username and current password are required.", "warning")
+            return render_template("admin/admin_credentials.html")
+
+        if not current_user.check_password(current_password):
+            flash("Current password is incorrect.", "danger")
+            return render_template("admin/admin_credentials.html")
+
+        existing_user = User.query.filter_by(username=username).first()
+        if existing_user and existing_user.id != current_user.id:
+            flash("Username already exists.", "danger")
+            return render_template("admin/admin_credentials.html")
+
+        if new_password:
+            if len(new_password) < 6:
+                flash("New password must be at least 6 characters.", "warning")
+                return render_template("admin/admin_credentials.html")
+            if new_password != confirm_password:
+                flash("New password and confirm password do not match.", "warning")
+                return render_template("admin/admin_credentials.html")
+
+        current_user.username = username
+        if new_password:
+            current_user.set_password(new_password)
+
+        db.session.commit()
+        flash("Admin login credentials updated successfully.", "success")
+        return redirect(url_for("dashboard.admin_account_credentials"))
+
+    return render_template("admin/admin_credentials.html")

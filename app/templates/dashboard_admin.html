@@ -4,6 +4,7 @@
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h2>Admin Dashboard</h2>
     <div class="d-flex gap-2">
+        <a class="btn btn-outline-dark" href="{{ url_for('dashboard.admin_account_credentials') }}">My Login Credentials</a>
         <a class="btn btn-primary" href="{{ url_for('patients.create_patient') }}">Register Patient</a>
         <a class="btn btn-outline-primary" href="{{ url_for('visits.create_visit') }}">Create Visit</a>
         <a class="btn btn-outline-secondary" href="{{ url_for('dashboard.receptionist_credentials') }}">Receptionist Credentials</a>
