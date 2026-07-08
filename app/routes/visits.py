@@ -6,7 +6,12 @@ from sqlalchemy import case, func
 
 from app.models import Doctor, Patient, Visit, db
 from app.utils.decorators import role_required
-from app.utils.helpers import generate_visit_number, generate_visit_token, parse_date
+from app.utils.helpers import (
+    generate_visit_number,
+    generate_visit_token,
+    parse_date,
+    parse_datetime,
+)
 
 
 visits_bp = Blueprint("visits", __name__, url_prefix="/visits")
@@ -44,49 +49,47 @@ def create_visit():
         reason_choice = form.get("reason_choice", "").strip()
         reason_other = form.get("reason_other", "").strip()
         reason = reason_choice if reason_choice != "Other" else reason_other
-        today = date.today()
+        form_visit_date = form.get("visit_date")
+        form_visit_time = form.get("visit_time")
+        visit_datetime = parse_datetime(form_visit_date, form_visit_time) or now
+        selected_date = visit_datetime.date()
 
-        if not patient_id or not doctor_id or not reason:
-            flash("Please fill in all required fields.", "warning")
+        def render_form():
             return render_template(
                 "visits/form.html",
                 patients=patients,
                 doctors=doctors,
                 selected_patient_id=patient_id,
                 visit_number=visit_number,
-                visit_date=now.date(),
-                visit_time=now.strftime("%H:%M"),
+                visit_date=form_visit_date or now.date(),
+                visit_time=form_visit_time or now.strftime("%H:%M"),
             )
+
+        if not patient_id or not doctor_id or not reason:
+            flash("Please fill in all required fields.", "warning")
+            return render_form()
 
         existing_visit = (
             Visit.query.filter(Visit.patient_id == int(patient_id))
-            .filter(func.date(Visit.visit_date) == today)
+            .filter(func.date(Visit.visit_date) == selected_date)
             .filter(Visit.status.in_(["Waiting", "In Consultation"]))
             .first()
         )
         if existing_visit:
             flash(
-                "An active visit already exists for this patient today.",
+                "An active visit already exists for this patient on the selected date.",
                 "warning",
             )
-            return render_template(
-                "visits/form.html",
-                patients=patients,
-                doctors=doctors,
-                selected_patient_id=patient_id,
-                visit_number=visit_number,
-                visit_date=now.date(),
-                visit_time=now.strftime("%H:%M"),
-            )
+            return render_form()
 
-        token_prefix, token_number, token_display = generate_visit_token(today)
+        token_prefix, token_number, token_display = generate_visit_token(selected_date)
 
         visit = Visit(
             visit_number=visit_number,
             token_prefix=token_prefix,
             token_number=token_number,
             token_display=token_display,
-            token_date=today,
+            token_date=selected_date,
             patient_id=int(patient_id),
             doctor_id=int(doctor_id),
             department=form.get("department"),
@@ -95,7 +98,7 @@ def create_visit():
             status=form.get("status", "Waiting"),
             created_by=current_user.username,
             created_at=datetime.utcnow(),
-            visit_date=now,
+            visit_date=visit_datetime,
         )
 
         db.session.add(visit)
@@ -120,6 +123,17 @@ def create_visit():
 def token(visit_id):
     visit = Visit.query.get_or_404(visit_id)
     return render_template("visits/token.html", visit=visit, show_sidebar=False)
+
+
+@visits_bp.route("/<int:visit_id>/delete", methods=["POST"])
+@login_required
+@role_required(["Administrator", "Receptionist"])
+def delete_visit(visit_id):
+    visit = Visit.query.get_or_404(visit_id)
+    db.session.delete(visit)
+    db.session.commit()
+    flash("Visit deleted successfully.", "success")
+    return redirect(url_for("visits.list_visits"))
 
 
 @visits_bp.route("/queue")

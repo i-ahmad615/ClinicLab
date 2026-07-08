@@ -1,5 +1,5 @@
 import re
-from datetime import date
+from datetime import date, datetime, time
 
 from app.models import Patient, Visit, db
 
@@ -60,3 +60,15 @@ def parse_date(value):
     if not value:
         return None
     return date.fromisoformat(value)
+
+
+def parse_datetime(date_value, time_value=None):
+    if not date_value:
+        return None
+    visit_date = date.fromisoformat(date_value)
+    if time_value:
+        parts = time_value.split(":")
+        hour = int(parts[0])
+        minute = int(parts[1]) if len(parts) > 1 else 0
+        return datetime.combine(visit_date, time(hour, minute))
+    return datetime.combine(visit_date, time.min)
