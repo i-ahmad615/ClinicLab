@@ -2,7 +2,7 @@
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h2>New Visit</h2>
+    <h2>{% if visit %}Edit Visit{% else %}New Visit{% endif %}</h2>
     <a class="btn btn-outline-secondary" href="{{ url_for('visits.list_visits') }}">Back</a>
 </div>
 
@@ -36,40 +36,46 @@
                 <select class="form-select" name="doctor_id" required>
                     <option value="">Select</option>
                     {% for doctor in doctors %}
-                    <option value="{{ doctor.id }}">{{ doctor.name }}{% if doctor.status and doctor.status != 'Active' %} ({{ doctor.status }}){% endif %}</option>
+                    <option value="{{ doctor.id }}" {% if selected_doctor_id and selected_doctor_id|int == doctor.id %}selected{% endif %}>{{ doctor.name }}{% if doctor.status and doctor.status != 'Active' %} ({{ doctor.status }}){% endif %}</option>
                     {% endfor %}
                 </select>
             </div>
             <div class="col-md-6">
                 <label class="form-label">Department</label>
-                <input type="text" name="department" class="form-control">
+                <input type="text" name="department" class="form-control" value="{{ department or '' }}">
             </div>
             <div class="col-md-6">
                 <label class="form-label">Reason of Visit *</label>
                 <select class="form-select" name="reason_choice" id="reasonChoice" required>
                     <option value="">Select</option>
                     {% for option in ['Fever', 'Loose motion', 'Vomiting', 'Diarria', 'Pneumonia', 'Dehydration', 'Other'] %}
-                    <option value="{{ option }}">{{ option }}</option>
+                    <option value="{{ option }}" {% if reason_choice == option %}selected{% endif %}>{{ option }}</option>
                     {% endfor %}
                 </select>
-                <input type="text" name="reason_other" id="reasonOther" class="form-control mt-2 d-none" placeholder="Please specify">
+                <input type="text" name="reason_other" id="reasonOther" class="form-control mt-2 {% if reason_choice != 'Other' %}d-none{% endif %}" placeholder="Please specify" value="{{ reason_other or '' }}">
             </div>
             <div class="col-md-4">
                 <label class="form-label">Follow Up Date</label>
-                <input type="date" name="follow_up_date" class="form-control">
+                <input type="date" name="follow_up_date" class="form-control" value="{% if follow_up_date %}{{ follow_up_date if follow_up_date is string else follow_up_date.isoformat() }}{% endif %}">
             </div>
             <div class="col-md-4">
                 <label class="form-label">Visit Status</label>
                 <select class="form-select" name="status">
                     {% for option in ['Waiting', 'In Consultation', 'Completed', 'Cancelled'] %}
-                    <option value="{{ option }}">{{ option }}</option>
+                    <option value="{{ option }}" {% if status == option %}selected{% endif %}>{{ option }}</option>
                     {% endfor %}
                 </select>
             </div>
+            {% if visit %}
+            <div class="col-md-4">
+                <label class="form-label">Token</label>
+                <input type="text" class="form-control" value="{{ visit.token_display or 'N/A' }}" readonly>
+            </div>
+            {% endif %}
         </div>
 
         <div class="mt-4 d-flex gap-2">
-            <button class="btn btn-primary" type="submit">Save</button>
+            <button class="btn btn-primary" type="submit">{% if visit %}Update{% else %}Save{% endif %}</button>
             <a class="btn btn-outline-secondary" href="{{ url_for('visits.list_visits') }}">Cancel</a>
         </div>
     </form>

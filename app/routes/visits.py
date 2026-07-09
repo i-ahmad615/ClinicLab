@@ -16,6 +16,37 @@ from app.utils.helpers import (
 
 visits_bp = Blueprint("visits", __name__, url_prefix="/visits")
 
+REASON_OPTIONS = [
+    "Fever",
+    "Loose motion",
+    "Vomiting",
+    "Diarria",
+    "Pneumonia",
+    "Dehydration",
+    "Other",
+]
+
+
+def get_visit_form_options(visit=None):
+    patients = Patient.query.filter_by(active=True).order_by(Patient.first_name.asc()).all()
+    doctors = Doctor.query.filter_by(status="Active").order_by(Doctor.name.asc()).all()
+
+    if visit:
+        if visit.patient_id not in {patient.id for patient in patients}:
+            patients = [visit.patient] + patients
+        if visit.doctor_id not in {doctor.id for doctor in doctors}:
+            doctors = [visit.doctor] + doctors
+    elif not doctors:
+        doctors = Doctor.query.order_by(Doctor.name.asc()).all()
+
+    return patients, doctors
+
+
+def get_reason_fields(reason):
+    if reason in REASON_OPTIONS:
+        return reason, ""
+    return "Other", reason or ""
+
 
 @visits_bp.route("/")
 @login_required
@@ -30,14 +61,12 @@ def list_visits():
 @role_required(["Administrator", "Receptionist"])
 def create_visit():
     patient_id = request.args.get("patient_id")
-    patients = Patient.query.filter_by(active=True).order_by(Patient.first_name.asc()).all()
-    doctors = Doctor.query.filter_by(status="Active").order_by(Doctor.name.asc()).all()
+    patients, doctors = get_visit_form_options()
     now = datetime.now()
     visit_number = generate_visit_number()
 
     if not doctors:
-        doctors = Doctor.query.order_by(Doctor.name.asc()).all()
-        if not doctors:
+        if not Doctor.query.first():
             flash("No doctors found. Please add a doctor first.", "warning")
         else:
             flash("No active doctors found. Showing all doctors.", "warning")
@@ -55,14 +84,21 @@ def create_visit():
         selected_date = visit_datetime.date()
 
         def render_form():
+            reason_choice, reason_other = get_reason_fields(reason)
             return render_template(
                 "visits/form.html",
                 patients=patients,
                 doctors=doctors,
                 selected_patient_id=patient_id,
+                selected_doctor_id=doctor_id,
                 visit_number=visit_number,
                 visit_date=form_visit_date or now.date(),
                 visit_time=form_visit_time or now.strftime("%H:%M"),
+                reason_choice=reason_choice,
+                reason_other=reason_other,
+                department=form.get("department"),
+                follow_up_date=form.get("follow_up_date"),
+                status=form.get("status", "Waiting"),
             )
 
         if not patient_id or not doctor_id or not reason:
@@ -111,9 +147,100 @@ def create_visit():
         patients=patients,
         doctors=doctors,
         selected_patient_id=patient_id,
+        selected_doctor_id=None,
         visit_number=visit_number,
         visit_date=now.date(),
         visit_time=now.strftime("%H:%M"),
+        status="Waiting",
+    )
+
+
+@visits_bp.route("/<int:visit_id>/edit", methods=["GET", "POST"])
+@login_required
+@role_required(["Administrator", "Receptionist"])
+def edit_visit(visit_id):
+    visit = Visit.query.get_or_404(visit_id)
+    patients, doctors = get_visit_form_options(visit)
+    now = datetime.now()
+    reason_choice, reason_other = get_reason_fields(visit.reason)
+
+    if request.method == "POST":
+        form = request.form
+        patient_id = form.get("patient_id")
+        doctor_id = form.get("doctor_id")
+        reason_choice = form.get("reason_choice", "").strip()
+        reason_other = form.get("reason_other", "").strip()
+        reason = reason_choice if reason_choice != "Other" else reason_other
+        form_visit_date = form.get("visit_date")
+        form_visit_time = form.get("visit_time")
+        visit_datetime = parse_datetime(form_visit_date, form_visit_time) or visit.visit_date
+        selected_date = visit_datetime.date()
+
+        def render_form():
+            return render_template(
+                "visits/form.html",
+                visit=visit,
+                patients=patients,
+                doctors=doctors,
+                selected_patient_id=patient_id,
+                selected_doctor_id=doctor_id,
+                visit_number=visit.visit_number,
+                visit_date=form_visit_date or visit.visit_date.date(),
+                visit_time=form_visit_time or visit.visit_date.strftime("%H:%M"),
+                reason_choice=reason_choice,
+                reason_other=reason_other,
+                department=form.get("department"),
+                follow_up_date=form.get("follow_up_date"),
+                status=form.get("status", visit.status),
+            )
+
+        if not patient_id or not doctor_id or not reason:
+            flash("Please fill in all required fields.", "warning")
+            return render_form()
+
+        existing_visit = (
+            Visit.query.filter(Visit.patient_id == int(patient_id))
+            .filter(func.date(Visit.visit_date) == selected_date)
+            .filter(Visit.status.in_(["Waiting", "In Consultation"]))
+            .filter(Visit.id != visit.id)
+            .first()
+        )
+        if existing_visit:
+            flash(
+                "An active visit already exists for this patient on the selected date.",
+                "warning",
+            )
+            return render_form()
+
+        visit.patient_id = int(patient_id)
+        visit.doctor_id = int(doctor_id)
+        visit.department = form.get("department")
+        visit.reason = reason
+        visit.follow_up_date = parse_date(form.get("follow_up_date"))
+        visit.status = form.get("status", visit.status)
+        visit.visit_date = visit_datetime
+        visit.token_date = selected_date
+        visit.updated_at = datetime.utcnow()
+
+        db.session.commit()
+        flash("Visit updated successfully.", "success")
+        return redirect(url_for("visits.list_visits"))
+
+    return render_template(
+        "visits/form.html",
+        visit=visit,
+        patients=patients,
+        doctors=doctors,
+        selected_patient_id=visit.patient_id,
+        selected_doctor_id=visit.doctor_id,
+        visit_number=visit.visit_number,
+        visit_date=visit.visit_date.date(),
+        visit_time=visit.visit_date.strftime("%H:%M"),
+        reason_choice=reason_choice,
+        reason_other=reason_other,
+        department=visit.department or "",
+        follow_up_date=visit.follow_up_date,
+        status=visit.status,
     )
 
 

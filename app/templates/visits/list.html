@@ -30,6 +30,7 @@
                     <td>{{ visit.status }}</td>
                     <td>{{ visit.reason }}</td>
                     <td class="text-end">
+                        <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('visits.edit_visit', visit_id=visit.id) }}">Edit</a>
                         <a class="btn btn-sm btn-outline-primary" href="{{ url_for('visits.token', visit_id=visit.id) }}">Print Token</a>
                         <form method="post" action="{{ url_for('visits.delete_visit', visit_id=visit.id) }}" class="d-inline">
                             <button class="btn btn-sm btn-outline-danger" data-confirm="Delete this visit record?" type="submit">Delete</button>
